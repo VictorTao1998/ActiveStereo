@@ -96,7 +96,7 @@ class TrainSolver(object):
             print('[{:d}] Model loaded.'.format(self.args.loadmodel))
         
         for epoch in range(self.config.SOLVER.EPOCHS):
-            self.model.eval()
+            self.model.train()
             self.epoch = epoch
             for i, data_batch in enumerate(self.TrainImgLoader):
                 start_time = time.time()
@@ -132,7 +132,7 @@ class TrainSolver(object):
                         train_EPE_left, 
                         train_3PE_left * 100,
                         elapsed
-                    ), end='\r'
+                    )
                 )
                 #print(imgL.shape, disp_pred_left.shape, disp_L.shape)
                 if self.global_step % self.args.summary_freq == 0:
