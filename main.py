@@ -6,36 +6,33 @@ import random
 import os
 from torch.backends import cudnn
 
-from Options import parse_opt
 from Sovlers import get_solver
+from utils.config import cfg
 
 def main():
     
     # Parse arguments.
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--options', type=str, help='Path to the option JSON file.', default='./Options/example.json')
+    parser = argparse.ArgumentParser(description='ActiveStereoNet')
+
+    parser.add_argument('--config-file', type=str, default='./configs/local_train_steps.yaml',
+                        metavar='FILE', help='Config files')
+    parser.add_argument('--summary-freq', type=int, default=500, help='Frequency of saving temporary results')
+    parser.add_argument('--save-freq', type=int, default=1000, help='Frequency of saving checkpoint')
+    parser.add_argument('--logdir', required=True, help='Directory to save logs and checkpoints')
+    parser.add_argument('--seed', type=int, default=1, metavar='S', help='Random seed (default: 1)')
+    parser.add_argument('--debug', action='store_true', help='Whether run in debug mode (will load less data)')
+    parser.add_argument('--warp_op', action='store_true',default=True, help='whether use warp_op function to get disparity')
+    parser.add_argument('--loadmodel', type=str, help='load pretrained model')
+
     args = parser.parse_args()
-    opt = parse_opt(args.options)
+    cfg.merge_from_file(args.config_file)
+    args = parser.parse_args()
     
-    # GPU/CPU Specification.
-    os.environ['CUDA_VISIBLE_DEVICES'] = opt['gpu_ids']
-    os.environ['MKL_NUM_THREADS'] = opt['cpu_threads']
-    os.environ['NUMEXPR_NUM_THREADS'] = opt['cpu_threads']
-    os.environ['OMP_NUM_THREADS'] = opt['cpu_threads']
-    
-    # Deterministic Settings.
-    if opt['deterministic']:
-        torch.manual_seed(712)
-        np.random.seed(712)
-        random.seed(712)
-        cudnn.deterministic = True
-        cudnn.benchmark = False
-    else:
-        cudnn.deterministic = False
-        cudnn.benchmark = True
+    cudnn.deterministic = False
+    cudnn.benchmark = True
     
     # Create solver.
-    solver = get_solver(opt)
+    solver = get_solver(args, cfg)
     
     # Run.
     solver.run()

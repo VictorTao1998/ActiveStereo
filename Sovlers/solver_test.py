@@ -7,7 +7,6 @@ import torch.nn as nn
 import matplotlib.pyplot as plt
 import torch.optim as optim
 import torch.nn.functional as F
-from Data import get_loader
 from Models import get_model
 from Losses import get_losses
 from Metrics.metrics import epe_metric

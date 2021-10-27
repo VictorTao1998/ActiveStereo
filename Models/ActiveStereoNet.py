@@ -12,7 +12,7 @@ class SiameseTower(nn.Module):
     def __init__(self, scale_factor):
         super(SiameseTower, self).__init__()
 
-        self.conv1 = conv_block(nc_in=3, nc_out=32, k=3, s=1, norm=None, act=None)
+        self.conv1 = conv_block(nc_in=1, nc_out=32, k=3, s=1, norm=None, act=None)
         res_blocks = [ResBlock(32, 32, 3, 1, 1)] * 3
         self.res_blocks = nn.Sequential(*res_blocks)    
         convblocks = [conv_block(32, 32, k=3, s=2, norm='bn', act='lrelu')] * int(math.log2(scale_factor))
@@ -108,7 +108,7 @@ class RefineNet(nn.Module):
         self.device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
 
         # stream_1, left_img
-        self.conv1_s1 = conv_block(3, 16, 3, 1)
+        self.conv1_s1 = conv_block(1, 16, 3, 1)
         self.resblock1_s1 = ResBlock(16, 16, 3, 1, 1)
         self.resblock2_s1 = ResBlock(16, 16, 3, 1, 2)
 
@@ -134,6 +134,7 @@ class RefineNet(nn.Module):
         stream2 = self.resblock1_s2(stream2)
         stream2 = self.resblock2_s2(stream2)
 
+        #print(stream1.shape, stream2.shape)
         out = torch.cat((stream1, stream2), 1)
         out = self.resblock3(out)
         out = self.resblock4(out)
